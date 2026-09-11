@@ -30,6 +30,8 @@ export const storeDocumentandChunks = async (
         id: fileId,
         name: fileName,
         format: format,
+        allowed:true,
+        isDeleted:false,
         createdAt: new Date()
       },
     }),

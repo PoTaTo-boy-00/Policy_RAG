@@ -1,15 +1,21 @@
-import type { ChunkQueryResult } from "../retrival/denseSearch.js";
 import type { HybridSearchResType } from "../retrival/hybridSearch.js";
 
-export const buildPrompt = (userQuery: string, chunks: HybridSearchResType[]) => {
+export const buildPrompt = (
+  userQuery: string,
+  chunks: HybridSearchResType[],
+) => {
   const formatedContext = chunks
     .map(
       (c, idx) =>
-        `[Source ${idx+1}]: File "${c.docName}" (Chunk ${c.chunkIndex})\n${c.content}`
+        `[Source ${idx + 1}]: File "${c.docName}" (Chunk ${c.chunkIndex})\n${c.content}`,
     )
     .join("\n\n");
-// console.log(formatedContext)
-  return `You are a strict QA assistant. Use ONLY the CONTEXT below to answer. Do not use outside knowledge.
+  // console.log(formatedContext)
+  return `You are a strict QA assistant.
+   Use ONLY the CONTEXT below to answer. Do not use outside knowledge.
+   If the context does not contain enough information
+to answer the question, say that the information
+could not be found in the provided documents.
 
 ### CONTEXT:
 ${formatedContext}
@@ -17,7 +23,7 @@ ${formatedContext}
 ### RULES:
 - Every sentence or bullet must end with its source tag, like [Source 1].
 - Plain text or Markdown bullets only. No code blocks, no HTML.
-- If the answer isn't in the CONTEXT, reply exactly: I cannot answer this based on the uploaded documents.
+- If the answer isn't in the CONTEXT, reply exactly: I cannot answer this please Contact HR.
 
 ### EXAMPLE:
 USER QUESTION: What is the project deadline?

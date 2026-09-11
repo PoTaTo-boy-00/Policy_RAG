@@ -4,6 +4,7 @@
 import FileUpload from "./components/FileUpload";
 import QueryInput from "./components/QueryInput";
 import Answer from "./components/Answer";
+import DocumentList from "./components/DocumentList";
 
 const Page = () => {
   return (
@@ -22,6 +23,7 @@ const Page = () => {
 
         <div className="space-y-6">
           <FileUpload />
+          <DocumentList/>
           <QueryInput />
           <Answer />
         </div>

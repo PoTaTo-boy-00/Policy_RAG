@@ -6,6 +6,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "../api";
 import { streamAns } from "./Answer";
+import { DocResponse, DocType } from "./FileUpload";
+import { useUploadedFiles } from "../hooks/useUploadedFIles";
 
 export interface QueryResponse {
   queryId: string;
@@ -44,11 +46,13 @@ const QueryInput = () => {
 
   const [query, setQuery] = useState("");
 
-  const { data: filePaths = [] } = useQuery({
-    queryKey: ["uploaded-files"],
-    queryFn: () => Promise.resolve([] as string[]),
-  });
-
+  // const { data: filePaths = [] } = useQuery({
+  //   queryKey: ["uploaded-files"],
+  //   queryFn: () => Promise.resolve([] as string[]),
+  // });
+  const {data:paths=[]}=useUploadedFiles()
+  const filePaths=paths.filter(d=>d.allowed).map(d=>d.id)
+  console.log("FilePaths",filePaths)
   const queryMutation = useMutation({
     mutationFn: postQuery,
 

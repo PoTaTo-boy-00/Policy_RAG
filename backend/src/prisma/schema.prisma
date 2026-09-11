@@ -17,6 +17,8 @@ model Document{
   id String @id @default(uuid())
   name String
   format String
+  allowed Boolean
+  isDeleted Boolean
   createdAt DateTime @default(now())
   chunks DocumentChunk[] 
 }

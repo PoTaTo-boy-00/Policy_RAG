@@ -75,6 +75,8 @@ export const DocumentScalarFieldEnum = {
   id: 'id',
   name: 'name',
   format: 'format',
+  allowed: 'allowed',
+  isDeleted: 'isDeleted',
   createdAt: 'createdAt'
 } as const
 

@@ -40,6 +40,7 @@ export const callLLM = async (prompt: string): Promise<string> => {
 
   return res.content as string;
 };
+
 export const callLLMSream = async function *(prompt: string) {
   const start=performance.now()
   const res = await gemmaLLM.stream(prompt);
@@ -54,13 +55,26 @@ export const callLLMSream = async function *(prompt: string) {
     "[LLM] latency:",
     `${(performance.now() - start).toFixed(0)}ms`
   );
-
-
-
 };
 
-export const callGemma = async (prompt: rewriteMessageType[]): Promise<string> => {
+export const callGemma = async (prompt: rewriteMessageType[]): Promise<string[]> => {
    // console.log("first")
   const res = await preRetrivalLLM.invoke(prompt);
-  return res.content as string;
+  const content = res.content as string;
+  console.log("[RAW GEMMA CONTENT]:", content);
+
+  try {
+     const cleanedContent = content
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim();
+    const queries=JSON.parse(cleanedContent)
+    if(!Array.isArray(queries) || queries.every(q=>typeof q!=="string")){
+      throw new Error("Gemma returned an invalid query format");
+    }
+    return queries
+  } catch (error) {
+     throw new Error("Failed to parse Gemma response as string array");
+  }
 };

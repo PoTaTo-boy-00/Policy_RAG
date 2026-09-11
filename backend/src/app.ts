@@ -16,12 +16,27 @@ import "./worker/textSplitterWorker.js";
 import "./worker/embedderWorker.js";
 import { rewriteQuery } from "./retrival/pre-retrival.js";
 import { sparseSearch } from "./retrival/sparseSearch.js";
-import { hybridSearch } from "./retrival/hybridSearch.js";
+import {
+  hybridSearch,
+  type HybridSearchResType,
+} from "./retrival/hybridSearch.js";
 import { measure } from "./performance/measure.js";
 import type { DocumentBlock } from "./types/documentType.js";
-import cors from "@fastify/cors"
-import { textSplitterProcessor, type TextSplitType } from "./processor/textSplitterProcessor.js";
+import cors from "@fastify/cors";
+import {
+  textSplitterProcessor,
+  type TextSplitType,
+} from "./processor/textSplitterProcessor.js";
 import { embedderProcessor } from "./processor/embedderProcessor.js";
+import { reRank } from "./retrival/reranker/rerank.js";
+import { retriveAndRerank } from "./service/retrival.service.js";
+import { deduplication } from "./utils/deduplication.js";
+import {
+    deleteDocument,
+  
+  getDocuments,
+  updateDocuments,
+} from "./controllers/document.controllers.js";
 
 export type fileDetails = {
   id: string;
@@ -49,14 +64,16 @@ export const queryStore = new Map<string, QueryData>();
 const app = fastify({
   logger: true,
 });
-await app.register(cors,{
-  origin:"*",
-  methods:['GET', 'POST','OPTIONS']
-})
+await app.register(cors, {
+  origin: "*",
+  methods: ["GET", "POST", "OPTIONS","PUT","DELETE"],
+});
 app.register(multipart);
+// ! HEALTH
 app.get("/ping", async (request, reply) => {
   return { title: "pong", timestamp: new Date() };
 });
+// ! UPLOAD A FILE
 app.post("/upload", async (req, res) => {
   const files = req.files();
   const paths: fileDetails[] = [];
@@ -81,7 +98,7 @@ app.post("/upload", async (req, res) => {
     pathIds,
   };
   // if(embed){
-    
+
   //   return {
   //     success:true,
   //     pathIds
@@ -114,28 +131,50 @@ app.post("/query", async (req, res) => {
         "Invalid payload. 'question' and a non-empty 'pathIds' array are required.",
     });
   }
-  const modifiedQuery = await measure("Rewrite Query", () =>
+  const queries: string[] = await measure("Rewrite Query", () =>
     rewriteQuery(question),
   );
 
-  const userEmbeds = await embedUserQuestion(modifiedQuery);
-  if (!userEmbeds || userEmbeds.length === 0) {
-    return res.status(422).send({
-      error: "Failed to generate vector embeddings for the provided question.",
-    });
-  }
-  const [sparseSearchResult, denseSearchResult] = await measure("[Hybrid Search]",()=>Promise.all([
-    sparseSearch(pathIds, question),
-    denseSearch(userEmbeds, pathIds),
-  ]));
+  // const userEmbeds = await embedUserQuestion(modifiedQuery);
+  // if (!userEmbeds || userEmbeds.length === 0) {
+  //   return res.status(422).send({
+  //     error: "Failed to generate vector embeddings for the provided question.",
+  //   });
+  // }
+  // const [sparseSearchResult, denseSearchResult] = await measure("[Hybrid Search]",()=>Promise.all([
+  //   sparseSearch(pathIds, question),
+  //   denseSearch(userEmbeds, pathIds),
+  // ]));
 
-  const hybridSearchRes = hybridSearch(
-    denseSearchResult,
-    sparseSearchResult,
-    5,
+  // const hybridSearchRes = hybridSearch(
+  //   denseSearchResult,
+  //   sparseSearchResult,
+  //   20, // need to get 20 resuklt
+  // );
+
+  // //  feed those 20 res to a rertanker along with our query anbd then it will send the top 5 similar chunks
+
+  // const documents=hybridSearchRes.map((res)=>{
+  //   return res.content
+  // })
+  // const rerankres=await reRank(question,documents)
+  // console.log(rerankres)
+  // console.log(rerankres.map(rank=>hybridSearchRes[rank.index]))
+
+  // let rres:HybridSearchResType[]=rerankres.map(rank=>hybridSearchRes[rank.index]!)
+
+  // console.log(rres.length)
+
+  const result = await Promise.all(
+    queries.map((q) => retriveAndRerank(q, pathIds)),
   );
-  const prompt =  buildPrompt(question, hybridSearchRes);
-  const sources = hybridSearchRes.map((chunk, idx) => ({
+  const flastResult = result.flat();
+  console.log(flastResult.length);
+  const uniqueRes = deduplication(flastResult);
+  console.log(uniqueRes.length);
+
+  const prompt = buildPrompt(question, uniqueRes);
+  const sources = uniqueRes.map((chunk, idx) => ({
     sourceId: `Source ${idx + 1}`,
     chunkId: chunk.id,
     documentName: chunk.docName,
@@ -143,6 +182,7 @@ app.post("/query", async (req, res) => {
     chunkIndex: chunk.chunkIndex,
     snippet: chunk.content,
   }));
+  // const op=await callLLM(prompt)
   const queryId = crypto.randomUUID();
   queryStore.set(queryId, {
     prompt,
@@ -150,27 +190,31 @@ app.post("/query", async (req, res) => {
   });
 
   return res.send({
+    // LLM_Output:op,
     queryId,
     sources,
   });
 });
+// * STREAMING
 app.get("/query/stream", async (req, res) => {
   const { queryId } = req.query as { queryId: string };
 
   const query = queryStore.get(queryId);
-
+  // console.log(query)
   if (!query) {
     return res.status(404).send({
       error: "Query not found",
     });
   }
-res.raw.setHeader("Access-Control-Allow-Origin", "*");
+  res.raw.setHeader("Access-Control-Allow-Origin", "*");
   res.raw.setHeader("Content-Type", "text/event-stream");
   res.raw.setHeader("Cache-Control", "no-cache");
   res.raw.setHeader("Connection", "keep-alive");
-
+  
   try {
+    console.log("Generation Started");
     for await (const chunk of callLLMSream(query.prompt)) {
+      console.log(chunk)
       res.raw.write(
         `data: ${JSON.stringify({
           type: "chunk",
@@ -178,7 +222,7 @@ res.raw.setHeader("Access-Control-Allow-Origin", "*");
         })}\n\n`,
       );
     }
-
+    
     res.raw.write(
       `data: ${JSON.stringify({
         type: "done",
@@ -186,19 +230,63 @@ res.raw.setHeader("Access-Control-Allow-Origin", "*");
     );
 
     res.raw.end();
+    // RUN A EAVLUATION SEPERATELY shoudl noty block the main thread 
   } catch (error) {
     console.error(error);
-
+    
     res.raw.write(
       `data: ${JSON.stringify({
         type: "error",
         message: "LLM generation failed",
       })}\n\n`,
     );
-
+    
     res.raw.end();
   }
+  console.log("Generation Ended");
 });
+
+
+/**
+ * 
+ ** DOCUMENT FETCH/UPDATE/DELETE
+ */
+app.get("/records", async (req, res) => {
+  const response = await getDocuments();
+  // const allResponse = await getAllDocuments();
+  res.send({
+     success:true,
+    response,
+    // allResponse,
+  });
+});
+app.put("/records/:id", async (req, res) => {
+  const {id} = req.params as {
+    id: string;
+
+  };
+  const resposne = await updateDocuments(id);
+  res.send({
+     success:true,
+    resposne,
+  });
+});
+app.delete("/records/:id", async (req, res) => {
+  const {id} = req.params as {
+    id: string;
+
+  };
+  // console.log(id)
+  const resposne = await deleteDocument(id);
+  res.send({
+    success:true,
+    resposne,
+  });
+});
+
+
+
+// __inti__ server
 app.listen({ port: 8080 }, (err, address) => {
   if (err) {
     console.error(err);

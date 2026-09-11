@@ -24,6 +24,7 @@
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "bullmq": "^6.3.4",
+    "cohere-ai": "^8.1.0",
     "dotenv": "^16.4.5",
     "fastify": "^5.12.1",
     "ioredis": "^5.11.1",

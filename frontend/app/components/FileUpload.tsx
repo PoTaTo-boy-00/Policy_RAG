@@ -1,71 +1,57 @@
-
 "use client";
 
 import React, { useState } from "react";
 import { api } from "../api";
-import {
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {  useUploadedFiles } from "../hooks/useUploadedFIles";
+import { postFiles } from "../utils/postFiles";
+export interface DocType {
+  id: string;
+  name: string;
+  allowed: boolean;
+  isDeleted: boolean;
+}
 
 export interface PathResponse {
   success: boolean;
   pathIds: PathIdItem[];
+  // doc:DocType[]
+}
+export interface DocResponse {
+  success: boolean;
+  // pathIds: PathIdItem[];
+  response: DocType[];
+  allResponse: DocType[];
 }
 
 export interface PathIdItem {
   id: string;
 }
 
-const postFiles = async (formData: FormData) => {
-  const res = await api.post("/upload", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-
-  const data: PathResponse = res.data;
-
-  if (!data.success) {
-    throw new Error("Failed to Upload a file");
-  }
-
-  return data.pathIds.map((path) => path.id);
-};
-
 const FileUpload = () => {
   const queryClient = useQueryClient();
 
   const [file, setFile] = useState<FileList | null>(null);
-  const [filePaths, setFilePaths] = useState<string[]>([]);
-
+  // const [filePaths, setFilePaths] = useState<string[]>([]);
+  const { data, isFetching } = useUploadedFiles();
+  console.log("[Upload File]", data);
   const uploadMutation = useMutation({
     mutationFn: postFiles,
-
-    onSuccess: (newIds) => {
-      setFilePaths((prev) => {
-        console.log("OLD:", prev);
-        console.log("NEW:", newIds);
-
-        return [...prev, ...newIds];
+    onSuccess: async () => {
+     setTimeout(async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["uploaded-files"],
       });
+    }, 1000);
 
-      queryClient.setQueryData<string[]>(
-        ["uploaded-files"],
-        (oldIds = []) => {
-          return [...oldIds, ...newIds];
-        }
-      );
+      setFile(null);
     },
-
     onError: (error) => {
       console.error("Upload failed:", error);
     },
   });
 
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFile(e.target.files);
     }
@@ -89,9 +75,7 @@ const FileUpload = () => {
     <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       {/* Header */}
       <div className="mb-5">
-        <h2 className="text-lg font-semibold text-slate-900">
-          Documents
-        </h2>
+        <h2 className="text-lg font-semibold text-slate-900">Documents</h2>
 
         <p className="mt-1 text-sm text-slate-500">
           Upload the HR policies you want to ask questions about.
@@ -117,10 +101,7 @@ const FileUpload = () => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
-              <path
-                d="M5 20h14"
-                strokeLinecap="round"
-              />
+              <path d="M5 20h14" strokeLinecap="round" />
             </svg>
           </div>
 
@@ -187,16 +168,10 @@ const FileUpload = () => {
         <div className="mt-5 flex justify-end">
           <button
             type="submit"
-            disabled={
-              !file ||
-              file.length === 0 ||
-              uploadMutation.isPending
-            }
+            disabled={!file || file.length === 0 || uploadMutation.isPending}
             className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
-            {uploadMutation.isPending
-              ? "Uploading..."
-              : "Upload documents"}
+            {uploadMutation.isPending ? "Uploading..." : "Upload documents"}
           </button>
         </div>
       </form>
@@ -204,10 +179,7 @@ const FileUpload = () => {
       {/* Success */}
       {uploadMutation.isSuccess && (
         <div className="mt-4 flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2.5 text-sm text-green-700">
-          <span className="font-medium">
-            Upload complete.
-          </span>
-
+          <span className="font-medium">Upload complete.</span>
           Your documents are ready to query.
         </div>
       )}
@@ -223,4 +195,3 @@ const FileUpload = () => {
 };
 
 export default FileUpload;
-

@@ -4,7 +4,7 @@ port 8080
 {
     body : files
     res: {
-         success,
+         success
     pathIds,
     }
 }
