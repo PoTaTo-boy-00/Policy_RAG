@@ -31,7 +31,7 @@ The following services/tools are required:
 | Embeddings | Ollama | `nomic-embed-text` |
 | Reranking | Cohere | Cohere Rerank API |
 | Vector Store | PostgreSQL | `pgvector` |
-| Cache / State | Redis | Redis |
+| Asynchronous Ingestion | Redis | BullMQ |
 ---
 ### 1. Clone the Repository
 
@@ -56,19 +56,31 @@ cd ../backend
 npm install
 ```
 ---
-### 3. Start PostgreSQL
+### 3. Database
 
-PostgreSQL must be running with the pgvector extension enabled.
+The backend uses **PostgreSQL with pgvector** for storing document chunks,
+embeddings, and metadata. **Prisma ORM** is used for database access and
+schema migrations.
+
+PostgreSQL must have the `pgvector` extension enabled.
 
 The database is used to store:
 
-Document chunks
-Embeddings
-Chunk metadata
-Vector indexes
+- Document chunks
+- Embeddings
+- Chunk metadata
 
-Configure the PostgreSQL connection in the backend environment variables.
+Configure the PostgreSQL connection in the backend `.env` file using
+`DATABASE_URL`.
 
+Generate the Prisma client and apply the database migrations:
+
+```bash
+cd backend
+
+npx prisma generate
+npx prisma migrate dev
+```
 ---
 
 ### 4. Set up Redis
@@ -103,7 +115,7 @@ The retrieval pipeline uses Cohere for reranking the chunks retrieved from
 the hybrid search stage.
 
 Create a Cohere API key and add it to the backend environment configuration.
-```bash
+```env
 COHERE_API_KEY=your_cohere_api_key
 ```
 
@@ -120,6 +132,7 @@ REDIS_URL=redis://localhost:6379
 
 # Ollama
 OLLAMA_BASE_URL=http://localhost:11434
+
 # Cohere
 COHERE_API_KEY=<cohere_api_key>
 
