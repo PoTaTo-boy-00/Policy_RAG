@@ -4,8 +4,8 @@ A RAG-based HR policy assistant that retrieves relevant policy information from 
 
 ## Projects
 
-- **Frontend:** [Frontend README](./frontend/README.md)
-- **Backend:** [Backend README](./backend/README.md)
+- **Frontend:** [Frontend ](./frontend)
+- **Backend:** [Backend ](./backend)
 
 ## Running Locally
 
