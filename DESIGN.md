@@ -131,6 +131,8 @@ This approach prioritizes grounding over answer completeness. A missing or uncer
 The system exposes three main endpoints covering document ingestion, query
 creation, and streamed answer generation.
 
+---
+
 ### 4.1 `/upload`
 
 The `/upload` endpoint accepts policy documents in Markdown, TXT, or PDF
@@ -152,7 +154,7 @@ subsequent queries.
     "pathIds":[]
 }
 ```
-
+---
 ### 4.2 `/query`
 The `/query` endpoint accepts a user's question and the IDs of the documents
 that should be searched.
@@ -183,6 +185,7 @@ The `sources` contain the retrieved information required for citations. This
 allows the client to associate the final answer with the policy evidence used
 by the RAG pipeline.
 
+---
 ### 4.3 `/query/stream?queryId=<queryId>`
 The `/query/stream` endpoint generates and streams the answer for an existing
 query.
@@ -209,7 +212,57 @@ Streaming allows the frontend to display the generated response incrementally
 instead of waiting for the complete LLM response.
 
 ---
+ 
+### 4.4 `/records`
 
+The `/records` endpoint retrieves the available document records.
+
+Response
+```json
+{
+  "success": true,
+  "response": []
+}
+
+```
+---
+### 4.5 `/records/:id`
+
+The `/records/:id` endpoint updates a document record using its ID.
+
+Response
+```json
+{
+  id: string
+}
+```
+Response
+```json
+{
+  "success": true,
+  "response": {}
+}
+```
+---
+### 4.6 `/records/:id`
+
+The same resource endpoint supports deletion of a document record.
+
+Request
+```json
+{
+id: string
+
+}
+```
+Response
+```json
+{
+  "success": true,
+  "response": {}
+}
+```
+---
 ## 5. Trade-offs
 
 ### Structure-Aware Chunking vs Fixed-Size Chunking

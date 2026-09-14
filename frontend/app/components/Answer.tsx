@@ -108,11 +108,13 @@ export const streamAns = async (
 };
 
 const Answer = () => {
-  const { data: queryRes } = useQuery<QueryResponse | null>({
-    queryKey: ["query-response"],
-    queryFn: () => Promise.resolve(null),
-    initialData: null,
-  });
+const { data: queryRes } = useQuery<QueryResponse | null>({
+  queryKey: ["query-response"],
+  queryFn: () => Promise.resolve(null),
+  initialData: null,
+  staleTime: Infinity,
+  gcTime: Infinity,
+});
 
   if (!queryRes) {
     return (
