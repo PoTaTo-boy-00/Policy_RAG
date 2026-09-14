@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from "react";
@@ -8,6 +7,7 @@ import { api } from "../api";
 import { streamAns } from "./Answer";
 import { DocResponse, DocType } from "./FileUpload";
 import { useUploadedFiles } from "../hooks/useUploadedFIles";
+import axios from "axios";
 
 export interface QueryResponse {
   queryId: string;
@@ -50,29 +50,31 @@ const QueryInput = () => {
   //   queryKey: ["uploaded-files"],
   //   queryFn: () => Promise.resolve([] as string[]),
   // });
-  const {data:paths=[]}=useUploadedFiles()
-  const filePaths=paths.filter(d=>d.allowed).map(d=>d.id)
-  console.log("FilePaths",filePaths)
+  const { data: paths = [] } = useUploadedFiles();
+  const filePaths = paths.filter((d) => d.allowed).map((d) => d.id);
+  console.log("FilePaths", filePaths);
   const queryMutation = useMutation({
     mutationFn: postQuery,
 
     onSuccess: async (data) => {
       const { sources, queryId } = data;
 
-      queryClient.setQueryData<QueryResponse>(
-        ["query-response"],
-        {
-          sources,
-          queryId,
-          answer: "",
-        }
-      );
+      queryClient.setQueryData<QueryResponse>(["query-response"], {
+        sources,
+        queryId,
+        answer: "",
+      });
 
       await streamAns(queryId, queryClient);
     },
 
     onError: (error) => {
-      console.error(error);
+      if (axios.isAxiosError(error) && error.response?.status === 429) {
+        alert("Query Too Large")
+        return;
+      }
+
+      console.error("Something went wrong:", error);
     },
   });
 
@@ -95,9 +97,7 @@ const QueryInput = () => {
   return (
     <section>
       <div className="mb-3">
-        <h2 className="text-lg font-semibold text-slate-900">
-          Ask a question
-        </h2>
+        <h2 className="text-lg font-semibold text-slate-900">Ask a question</h2>
 
         <p className="mt-1 text-sm text-slate-500">
           Ask anything about your uploaded HR policies.
@@ -120,9 +120,7 @@ const QueryInput = () => {
 
           <button
             type="submit"
-            disabled={
-              !query.trim() || queryMutation.isPending
-            }
+            disabled={!query.trim() || queryMutation.isPending}
             className="flex shrink-0 items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
             {queryMutation.isPending ? (
@@ -147,7 +145,6 @@ const QueryInput = () => {
                     strokeLinecap="round"
                   />
                 </svg>
-
                 Asking...
               </>
             ) : (
@@ -170,4 +167,3 @@ const QueryInput = () => {
 };
 
 export default QueryInput;
-

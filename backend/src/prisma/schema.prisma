@@ -28,6 +28,8 @@ model DocumentChunk{
   content String @db.Text
   chunkIndex  Int
   documentId String
+  // section String
+  // headingPath String
   document Document @relation(fields: [documentId],references: [id], onDelete: Cascade)
   embedding Unsupported("vector(768)")?
   @@index([documentId])

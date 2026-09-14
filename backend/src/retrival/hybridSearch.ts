@@ -45,13 +45,17 @@ export const hybridSearch =  (
     });
   });
   const hybridSearchRes = Array.from(scores.entries())
-    .map(([id, rrfScore],idx) => ({
-      index:idx,
+    .map(([id, rrfScore]) => ({
+      // index:idx,
       ...chunkData.get(id),
       rrfScore,
     }))
     .sort((a, b) => b.rrfScore - a.rrfScore)
-    .slice(0, topK);
-
+    .slice(0, topK)
+    .map((item,index)=>({
+      ...item,
+      index
+    }));
+    // console.log(hybridSearchRes)
   return hybridSearchRes;
 };

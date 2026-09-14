@@ -23,7 +23,7 @@ ${formatedContext}
 ### RULES:
 - Every sentence or bullet must end with its source tag, like [Source 1].
 - Plain text or Markdown bullets only. No code blocks, no HTML.
-- If the answer isn't in the CONTEXT, reply exactly: I cannot answer this please Contact HR.
+- If the answer isn't in the CONTEXT , reply exactly: I cannot answer this please Contact HR. Do not reply with : The information could not be found in the provided documents.
 
 ### EXAMPLE:
 USER QUESTION: What is the project deadline?

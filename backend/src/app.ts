@@ -10,11 +10,18 @@ import {
 import { storeDocumentandChunks } from "./db/dbService.js";
 import { denseSearch, type ChunkQueryResult } from "./retrival/denseSearch.js";
 import { buildPrompt } from "./generation/buildPrompt.js";
-import { callLLM, callLLMSream } from "./generation/llm.js";
+import {
+  callCompressionQuery,
+  callLLM,
+  callLLMSream,
+} from "./generation/llm.js";
 import { createIngestionFLow } from "./ingestion/pipeline/ingectionFlowProducer.js";
 import "./worker/textSplitterWorker.js";
 import "./worker/embedderWorker.js";
-import { rewriteQuery } from "./retrival/pre-retrival.js";
+import {
+  rewriteQuery,
+  type rewriteMessageType,
+} from "./retrival/pre-retrival.js";
 import { sparseSearch } from "./retrival/sparseSearch.js";
 import {
   hybridSearch,
@@ -32,11 +39,15 @@ import { reRank } from "./retrival/reranker/rerank.js";
 import { retriveAndRerank } from "./service/retrival.service.js";
 import { deduplication } from "./utils/deduplication.js";
 import {
-    deleteDocument,
-  
+  deleteDocument,
   getDocuments,
   updateDocuments,
 } from "./controllers/document.controllers.js";
+import {
+  evaluateCoverage,
+  evaluateGroundness,
+} from "./evaluation/evaluation.js";
+import { joinQueryPrompt } from "./generation/joinPrompt.js";
 
 export type fileDetails = {
   id: string;
@@ -48,30 +59,32 @@ export type UserQuery = {
   question: string;
   pathIds: string[];
 };
+export type Sources = {
+  sourceId: string;
+  chunkId: string;
+  documentName: string;
+  documentId: string;
+  chunkIndex: number;
+  snippet: string;
+};
 type QueryData = {
   prompt: string;
-  sources: {
-    sourceId: string;
-    chunkId: string;
-    documentName: string;
-    documentId: string;
-    chunkIndex: number;
-    snippet: string;
-  }[];
+  question: string;
+  sources: Sources[];
 };
-
 export const queryStore = new Map<string, QueryData>();
 const app = fastify({
   logger: true,
 });
 await app.register(cors, {
   origin: "*",
-  methods: ["GET", "POST", "OPTIONS","PUT","DELETE"],
+  methods: ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
 });
 app.register(multipart);
 // ! HEALTH
-app.get("/ping", async (request, reply) => {
-  return { title: "pong", timestamp: new Date() };
+
+app.get("/health", async (request, reply) => {
+  return { title: "OK", timestamp: new Date() };
 });
 // ! UPLOAD A FILE
 app.post("/upload", async (req, res) => {
@@ -131,10 +144,14 @@ app.post("/query", async (req, res) => {
         "Invalid payload. 'question' and a non-empty 'pathIds' array are required.",
     });
   }
-  const queries: string[] = await measure("Rewrite Query", () =>
+  // const queries: string[] = [question]
+  let queries: string[] = await measure("Rewrite Query", () =>
     rewriteQuery(question),
   );
-
+  if (queries.length > 10) {
+    const prompt: rewriteMessageType[] = joinQueryPrompt(queries);
+    queries = await callCompressionQuery(prompt);
+  }
   // const userEmbeds = await embedUserQuestion(modifiedQuery);
   // if (!userEmbeds || userEmbeds.length === 0) {
   //   return res.status(422).send({
@@ -168,10 +185,12 @@ app.post("/query", async (req, res) => {
   const result = await Promise.all(
     queries.map((q) => retriveAndRerank(q, pathIds)),
   );
+  // console.log("[Reranbk3ed resulr] ",result)
   const flastResult = result.flat();
-  console.log(flastResult.length);
+  // console.log(flastResult.length);
   const uniqueRes = deduplication(flastResult);
-  console.log(uniqueRes.length);
+  // const uniqueRes = flastResult;
+  // console.log(uniqueRes.length);
 
   const prompt = buildPrompt(question, uniqueRes);
   const sources = uniqueRes.map((chunk, idx) => ({
@@ -186,9 +205,13 @@ app.post("/query", async (req, res) => {
   const queryId = crypto.randomUUID();
   queryStore.set(queryId, {
     prompt,
+    question,
     sources,
   });
+  //  void evaluateCoverage(question,sources).catch((error)=>{
+  //       console.error("[from: /query/stream EVAL SET] ",error);
 
+  //     })
   return res.send({
     // LLM_Output:op,
     queryId,
@@ -210,11 +233,12 @@ app.get("/query/stream", async (req, res) => {
   res.raw.setHeader("Content-Type", "text/event-stream");
   res.raw.setHeader("Cache-Control", "no-cache");
   res.raw.setHeader("Connection", "keep-alive");
-  
+  let answer = "";
   try {
     console.log("Generation Started");
     for await (const chunk of callLLMSream(query.prompt)) {
-      console.log(chunk)
+      // console.log(chunk)
+      answer += chunk;
       res.raw.write(
         `data: ${JSON.stringify({
           type: "chunk",
@@ -222,7 +246,7 @@ app.get("/query/stream", async (req, res) => {
         })}\n\n`,
       );
     }
-    
+
     res.raw.write(
       `data: ${JSON.stringify({
         type: "done",
@@ -230,61 +254,58 @@ app.get("/query/stream", async (req, res) => {
     );
 
     res.raw.end();
-    // RUN A EAVLUATION SEPERATELY shoudl noty block the main thread 
+    console.log(answer);
+    // RUN A EAVLUATION SEPERATELY shoudl noty block the main thread
+    //  evaluateGroundness(answer,query.sources)
   } catch (error) {
     console.error(error);
-    
+
     res.raw.write(
       `data: ${JSON.stringify({
         type: "error",
         message: "LLM generation failed",
       })}\n\n`,
     );
-    
+
     res.raw.end();
   }
   console.log("Generation Ended");
 });
 
-
 /**
- * 
+ *
  ** DOCUMENT FETCH/UPDATE/DELETE
  */
 app.get("/records", async (req, res) => {
   const response = await getDocuments();
   // const allResponse = await getAllDocuments();
   res.send({
-     success:true,
+    success: true,
     response,
     // allResponse,
   });
 });
 app.put("/records/:id", async (req, res) => {
-  const {id} = req.params as {
+  const { id } = req.params as {
     id: string;
-
   };
   const resposne = await updateDocuments(id);
   res.send({
-     success:true,
+    success: true,
     resposne,
   });
 });
 app.delete("/records/:id", async (req, res) => {
-  const {id} = req.params as {
+  const { id } = req.params as {
     id: string;
-
   };
   // console.log(id)
   const resposne = await deleteDocument(id);
   res.send({
-    success:true,
+    success: true,
     resposne,
   });
 });
-
-
 
 // __inti__ server
 app.listen({ port: 8080 }, (err, address) => {

@@ -60,5 +60,6 @@ export const denseSearch=async(userEmbeddings:number[],pathIds:string[]) : Promi
         documentName:docMap.get(c.documentId)||""
     }))
     // console.log("[Dense Search res]",relevantChunks)
+    // console.log("[DENSE SEARCH]",relevantChunks)
     return relevantChunks
 }
