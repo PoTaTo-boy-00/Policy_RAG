@@ -1,5 +1,20 @@
 # DESIGN DOC
 
+## Technology Stack
+
+| Technology | Purpose | Why |
+|---|---|---|
+| **TypeScript** | Application language | Type safety and maintainability. |
+| **Fastify** | Backend API | Lightweight and performant API framework. |
+| **PostgreSQL** | Database | Reliable relational database with `pgvector` support. |
+| **Prisma** | ORM | Type-safe database access and migrations. |
+| **pgvector** | Vector search | Stores and searches embeddings in PostgreSQL. |
+| **BullMQ + Redis** | Async ingestion | Processes document ingestion as background jobs. |
+| **LangChain** | RAG pipeline | Simplifies retrieval and LLM integration. |
+| **remark-parse and remark-gfm** | Markdown parsing | Parses Markdown into a structured format. |
+| **unified** | Document processing | Provides the Markdown processing pipeline. |
+| **Firecrawl / PDFInspector** | PDF extraction | Extracts and converts document content for processing. |
+| **Cohere API** | Reranking | Improves relevance of retrieved chunks. |
 
 ## 1. Architecture
 

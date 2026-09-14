@@ -126,7 +126,7 @@ COHERE_API_KEY=your_cohere_api_key
 Create a `.env` file in the `backend` directory:
 
 ```env
-DATABASE_URL==postgresql://user:password@localhost:5432/policyrag
+DATABASE_URL=postgresql://user:password@localhost:5432/policyrag
 # Redis
 REDIS_URL=redis://localhost:6379
 
