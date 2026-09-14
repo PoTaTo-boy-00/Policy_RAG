@@ -9,7 +9,7 @@ A RAG-based HR policy assistant that retrieves relevant policy information from 
 
 ## Running Locally
 
-The application consists of a Next.js frontend and a backend service. The backend requires Redis and Ollama for caching/processing and local LLM/embedding inference.
+The application consists of a Next.js frontend and a backend service. The backend requires Redis and Ollama for processing and local LLM/embedding inference.
 
 ---
 ### Prerequisites

@@ -155,7 +155,7 @@ that should be searched.
 #### Response
 ```json
 {
-  "queryId": "...",
+  "queryId": "string",
   "sources": []
 }
 ```
