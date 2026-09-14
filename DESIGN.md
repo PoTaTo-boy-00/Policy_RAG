@@ -133,7 +133,7 @@ subsequent queries.
 
 ```json
 {
-    "success":boolean,
+    "success":"boolean",
     "pathIds":[]
 }
 ```
@@ -186,7 +186,7 @@ The query ID is provided as a URL query parameter.
 ```json
 {
 
-    stream output
+    "stream output"
 }
 ```
 
