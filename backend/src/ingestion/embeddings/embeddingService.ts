@@ -2,7 +2,7 @@ import { OllamaEmbeddings } from "@langchain/ollama";
 
 const OLLAMA_URL=process.env.OLLAMA_BASE_URL||"http://localhost:11434"
 export const embedder=new OllamaEmbeddings({
-    model:"nomic-embed-text",
+    model:process.env.EMBEDDING_MODEL||"",
     baseUrl:OLLAMA_URL
 })
 

@@ -67,7 +67,7 @@ export type Sources = {
   chunkIndex: number;
   snippet: string;
 };
-type QueryData = {
+export type QueryData = {
   prompt: string;
   question: string;
   sources: Sources[];

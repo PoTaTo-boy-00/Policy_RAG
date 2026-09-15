@@ -21,7 +21,7 @@ export const retriveAndRerank=async(query:string,pathIds:string[]):Promise<Hybri
     sparseSearchResult,
     20, // need to get 20 resuklt
   );
-  // console.log("[Hybrid Search Res] ",hybridSearchRes)
+  console.log("[Hybrid Search Res] ",hybridSearchRes)
   //  feed those 20 res to a rertanker along with our query anbd then it will send the top 5 similar chunks 
  
   let documents=hybridSearchRes.map((res)=>{

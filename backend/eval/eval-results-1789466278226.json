@@ -1,0 +1,98 @@
+[
+  {
+    "question": "What is the optical allowance for Band C employees?",
+    "coverageScore": null,
+    "coverageExplanation": "",
+    "groundednessScore": null,
+    "groundednessExplanation": "",
+    "answer": "",
+    "passed": false,
+    "failReasons": [
+      "Threw error: PATHS IDS NOT PROVIDED"
+    ]
+  },
+  {
+    "question": "Is dental implant treatment covered?",
+    "coverageScore": null,
+    "coverageExplanation": "",
+    "groundednessScore": null,
+    "groundednessExplanation": "",
+    "answer": "",
+    "passed": false,
+    "failReasons": [
+      "Threw error: PATHS IDS NOT PROVIDED"
+    ]
+  },
+  {
+    "question": "What happens to unused casual leave?",
+    "coverageScore": null,
+    "coverageExplanation": "",
+    "groundednessScore": null,
+    "groundednessExplanation": "",
+    "answer": "",
+    "passed": false,
+    "failReasons": [
+      "Threw error: PATHS IDS NOT PROVIDED"
+    ]
+  },
+  {
+    "question": "how many maternity leave can i get ?",
+    "coverageScore": null,
+    "coverageExplanation": "",
+    "groundednessScore": null,
+    "groundednessExplanation": "",
+    "answer": "",
+    "passed": false,
+    "failReasons": [
+      "Threw error: PATHS IDS NOT PROVIDED"
+    ]
+  },
+  {
+    "question": "what benefits do i get as an intern?",
+    "coverageScore": null,
+    "coverageExplanation": "",
+    "groundednessScore": null,
+    "groundednessExplanation": "",
+    "answer": "",
+    "passed": false,
+    "failReasons": [
+      "Threw error: PATHS IDS NOT PROVIDED"
+    ]
+  },
+  {
+    "question": "Does the Standard health tier cover dental implants?",
+    "coverageScore": null,
+    "coverageExplanation": "",
+    "groundednessScore": null,
+    "groundednessExplanation": "",
+    "answer": "",
+    "passed": false,
+    "failReasons": [
+      "Threw error: PATHS IDS NOT PROVIDED"
+    ]
+  },
+  {
+    "question": "What does POL-OPT-8000 refer to?",
+    "coverageScore": null,
+    "coverageExplanation": "",
+    "groundednessScore": null,
+    "groundednessExplanation": "",
+    "answer": "",
+    "passed": false,
+    "failReasons": [
+      "Threw error: PATHS IDS NOT PROVIDED"
+    ]
+  },
+  {
+    "question": "I joined the company after January 1, need to take three consecutive days off, and still have some unused leave left at the end of the year. How are my leave entitlements calculated, how far in advance do I need to request the planned leave, and what happens to any unused casual and privilege leave when the year ends?",
+    "coverageScore": null,
+    "coverageExplanation": "",
+    "groundednessScore": null,
+    "groundednessExplanation": "",
+    "answer": "",
+    "passed": false,
+    "failReasons": [
+      "Threw error: PATHS IDS NOT PROVIDED"
+    ]
+  }
+]

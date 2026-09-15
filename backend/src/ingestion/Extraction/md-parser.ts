@@ -45,6 +45,14 @@ export const parseMd = async (filePath: string) => {
         })
         continue;
     }
+    if(node.type==="list"){
+      const text=node.children.map(item=>getText(item)).join('\n')
+      blocks.push({
+        type:"paragraph",
+        text,
+        headingPath:[...headingStack]
+      })
+    }
   }
   console.log(blocks)
   return blocks

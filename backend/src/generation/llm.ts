@@ -1,10 +1,11 @@
 import { ChatOllama } from "@langchain/ollama";
 import type { rewriteMessageType } from "../retrival/pre-retrival.js";
 import { z } from "zod";
+import "dotenv/config"
 const OLLAMA_URL = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
-
+// console.log(process.env.GENERATION_MODEL)
 const gemmaLLM = new ChatOllama({
-  model: "gemma4",
+  model: process.env.GENERATION_MODEL||"",
   temperature: 0,
   think: false,
   baseUrl: OLLAMA_URL,
@@ -22,17 +23,17 @@ const gemmaLLM = new ChatOllama({
 });
 
 const preRetrivalLLM = new ChatOllama({
-  model: "gemma4",
+  model: process.env.GENERATION_MODEL||"",
   temperature: 0.1,
-  think:false,
+  think: false,
   baseUrl: OLLAMA_URL,
   keepAlive: "15m",
 });
 
 const retrievalRelevanceLLM = new ChatOllama({
-  model: "gemma4",
+  model: process.env.EVALUATION_MODEL||"",
   temperature: 0,
-  think:false,
+  think: false,
   baseUrl: OLLAMA_URL!,
   keepAlive: "15m",
 }).withStructuredOutput(
@@ -40,7 +41,7 @@ const retrievalRelevanceLLM = new ChatOllama({
     .object({
       explanation: z.string().describe("Explain your reasoning for the score"),
       coverageScore: z
-      .number()
+        .number()
         .min(0)
         .max(1)
         .describe(
@@ -48,7 +49,33 @@ const retrievalRelevanceLLM = new ChatOllama({
         ),
     })
     .describe("Grounded score for the answer from the retrieved documents."),
+);
+const groundednessLLM = new ChatOllama({
+  model: process.env.EVALUATION_MODEL||"",
+  temperature: 0,
+  think: false,
+  baseUrl: OLLAMA_URL!,
+  keepAlive: "15m",
+}).withStructuredOutput(
+  z
+    .object({
+      explanation: z
+        .string()
+        .describe(
+          "Explain which claims in the answer are supported or unsupported by the retrieved documents.",
+        ),
 
+      groundednessScore: z
+        .number()
+        .min(0)
+        .max(1)
+        .describe(
+          "Score how completely the answer is supported by the retrieved documents. 1 means every factual claim is supported; 0 means the answer is completely unsupported or contradicts the documents.",
+        ),
+    })
+    .describe(
+      "Evaluate whether the generated answer is grounded in the retrieved documents.",
+    ),
 );
 
 export const callLLM = async (prompt: string): Promise<string> => {
@@ -56,7 +83,7 @@ export const callLLM = async (prompt: string): Promise<string> => {
   const res = await gemmaLLM.invoke(prompt);
   console.log("[LLM] latency:", `${(performance.now() - start).toFixed(0)}ms`);
 
-  console.log("[LLM] metadata:", res.response_metadata);
+  // console.log("[LLM] metadata:", res.response_metadata);
 
   return res.content as string;
 };
@@ -100,38 +127,39 @@ export const callGemma = async (
   }
 };
 
-export const callCompressionQuery=async(prompt:rewriteMessageType[]):Promise<string[]>=>{
+export const callCompressionQuery = async (
+  prompt: rewriteMessageType[],
+): Promise<string[]> => {
   try {
-    const res=await preRetrivalLLM.invoke(prompt)
-    const content=res.content as string
+    const res = await preRetrivalLLM.invoke(prompt);
+    const content = res.content as string;
     const cleanedContent = content
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/\s*```$/i, "")
-    .trim();
-    const queries=JSON.parse(cleanedContent)
-    console.log(queries)
-   
-   if (
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim();
+    const queries = JSON.parse(cleanedContent);
+    console.log(queries);
+
+    if (
       !Array.isArray(queries) ||
       queries.every((q) => typeof q !== "string")
     ) {
       throw new Error("Gemma returned an invalid query format");
     }
-    console.log("[COMPRESSION QUERY ]",queries)
+    console.log("[COMPRESSION QUERY ]", queries);
     return queries;
   } catch (error) {
     throw new Error("Failed to parse Gemma response as string array");
   }
-}
-
+};
 export const callEvalLLM = async (
+  type: "groundness" | "coverage",
   prompt: string,
   answer: string,
 ) => {
-  console.log("[Eval] Before invoke");
 
-  const system_and_base_prompt = [
+  const systemAndUserPrompt = [
     {
       role: "system",
       content: prompt,
@@ -142,15 +170,28 @@ export const callEvalLLM = async (
     },
   ];
 
-  console.log("[Eval] Sending to Ollama");
+  switch (type) {
 
-  const grade = await retrievalRelevanceLLM.invoke(system_and_base_prompt);
+    case "groundness": {
+      const grade =
+        await groundednessLLM.invoke(systemAndUserPrompt);
 
-  console.log("[Eval] Ollama returned");
-  console.log("[Eval] Grade:", grade);
+      return {
+        key: "groundedness",
+        score: grade.groundednessScore,
+        explanation: grade.explanation,
+      };
+    }
 
-  return {
-    key: "retrieval_relevance",
-    groundScore: grade.coverageScore,
-  };
+    case "coverage": {
+      const grade =
+        await retrievalRelevanceLLM.invoke(systemAndUserPrompt);
+
+      return {
+        key: "retrieval_coverage",
+        score: grade.coverageScore,
+        explanation: grade.explanation,
+      };
+    }
+  }
 };

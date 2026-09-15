@@ -13,6 +13,14 @@ export const getDocuments = async ():Promise<DocType[]> => {
 
   return allowedDocuments
 }
+export const getDocumentId = async ():Promise<string[]> => {
+  const allowedDocuments = await prisma.document.findMany({
+    where: {  isDeleted: false },
+    select:{id:true,name:true,isDeleted:true,allowed:true}
+  });
+
+  return allowedDocuments.map(doc=>doc.id)
+}
 
 // export const gdeDocuments=async()=>{}
 export const updateDocuments = async (id: string) => {

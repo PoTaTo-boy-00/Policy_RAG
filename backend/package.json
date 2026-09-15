@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "nodemon --exec node --loader ts-node/esm ./src/app.ts",
     "start": "node ./dist/app.js",
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "eval":" node --loader ts-node/esm src/evaluation/runEvaluation.ts "
   },
   "keywords": [],
   "author": "",

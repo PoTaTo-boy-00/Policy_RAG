@@ -1,0 +1,148 @@
+[
+  {
+    "question": "What is the optical allowance for Band C employees?",
+    "retrievedIds": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "coverageScore": 1,
+    "coverageExplanation": "The question asks for the optical allowance for Band C employees. The FACTS state that the Standard Health Tier, which includes Band C, provides an optical allowance of ₹8,000. This directly answers the question based on the specific band mentioned. All information needs are met.",
+    "groundednessScore": 1,
+    "groundednessExplanation": "The answer states that the Standard Health Tier provides an optical allowance of ₹8,000, which is directly supported by multiple sections of the FACTS (specifically, the 'Benefits Policy' table and the 'Sparse Retrieval Test Policy' sections).",
+    "answer": "- The Standard Health Tier provides an optical allowance of ₹8,000 [Source 3, Source 4].",
+    "passed": true,
+    "failReasons": []
+  },
+  {
+    "question": "Is dental implant treatment covered?",
+    "retrievedIds": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "coverageScore": 1,
+    "coverageExplanation": "The question asks if dental implant treatment is covered. The FACTS explicitly state that dental implants are 'Not covered' under the Essential Health Tier, and also show a table confirming 'Not covered' for the Essential Tier. This directly answers the question for the tier mentioned in the context (Essential Health Tier). 1 of 1 information need met.",
+    "groundednessScore": 1,
+    "groundednessExplanation": "The answer accurately reflects the information provided in the FACTS regarding dental implants for the Essential, Standard, and Plus health tiers. The first point is directly stated. The second point is supported by the table data for the Standard tier. The third point is supported by the table data for the Plus tier.",
+    "answer": "- Dental implants are not covered under the Essential Health Tier [Source 1].\n- For the Standard health tier, dental implants are listed as \"Not covered\" [Source 2].\n- For the Plus health tier, dental implants are \"Covered up to ₹40,000\" [Source 2].",
+    "passed": true,
+    "failReasons": []
+  },
+  {
+    "question": "What happens to unused casual leave?",
+    "retrievedIds": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "coverageScore": 1,
+    "coverageExplanation": "The question asks what happens to unused casual leave. The FACTS provide conflicting and detailed information regarding this. One section states a maximum of 8 days can be carried forward, and any excess lapses on December 31st. Another section states that unused Casual Leave cannot be carried forward at all. A third section states that carried-forward casual leave must be used by March 31st, after which it lapses. Since the FACTS provide multiple, conflicting rules on the lapse/carry-forward of unused casual leave, the core information need is addressed, albeit confusingly. All distinct information needs (what happens to unused leave) are covered by providing multiple potential answers/rules.",
+    "groundednessScore": 0,
+    "groundednessExplanation": "The answer presents three distinct claims regarding casual leave carry-forward. The first claim is fully supported by the first retrieved section. The second claim is fully supported by the third retrieved section. However, the third claim, stating that 'Unused Casual Leave cannot be carried forward to the next calendar year,' directly contradicts the first claim which states a maximum of 8 days *may* be carried forward. Since the answer presents these conflicting statements as factual points, and the contradiction is based on the FACTS themselves, the answer is ungrounded because it presents contradictory information without resolution, violating the principle of presenting a coherent, supported narrative.",
+    "answer": "- A maximum of 8 days of unused casual leave may be carried forward to the next calendar year, and any casual leave above 8 days lapses on 31 December [Source 1].\n- Carried-forward casual leave must be used by 31 March of the following year, after which it lapses [Source 3].\n- Unused Casual Leave cannot be carried forward to the next calendar year [Source 2].",
+    "passed": false,
+    "failReasons": [
+      "Groundedness 0 below threshold 0.7"
+    ]
+  },
+  {
+    "question": "how many maternity leave can i get ?",
+    "retrievedIds": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "coverageScore": 0,
+    "coverageExplanation": "The question asks about the amount of maternity leave. The retrieved FACTS discuss various types of leave (Privilege Leave, Casual Leave) and their accrual/carry-forward rules, but none of the documents mention 'maternity leave' or specify the number of days for it. Therefore, the information need is completely missing.",
+    "groundednessScore": 0,
+    "groundednessExplanation": "The answer is a generic refusal to answer, which is not factually supported or contradicted by the provided FACTS. However, since the FACTS provide specific contact instructions for leave balance questions, a simple refusal is less helpful than directing the user to the provided contacts.",
+    "answer": "I cannot answer this please Contact HR.",
+    "passed": false,
+    "failReasons": [
+      "Coverage 0 below threshold 0.7",
+      "Groundedness 0 below threshold 0.7"
+    ]
+  },
+  {
+    "question": "what benefits do i get as an intern?",
+    "retrievedIds": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "coverageScore": 1,
+    "coverageExplanation": "The FACTS provide specific benefit details for 'Intern' under the 'Health coverage tiers' section (e.g., Annual sum insured: ₹3,00,000, Dental check-up: Yes, 1 visit, Optical: ₹5,000, Mental health counselling: 4 sessions). They also provide an LTA limit for 'Intern, Band A' (₹25,000). The question asks generally what benefits an intern gets. The FACTS cover multiple specific benefits (Health, LTA) for the intern role. 2 of 2 main areas (Health and LTA) are covered with specific details.",
+    "groundednessScore": 1,
+    "groundednessExplanation": "The answer accurately reports the annual sum insured, dental check-up eligibility, and LTA limit for Intern, Band A, all of which are directly supported by the provided FACTS.",
+    "answer": "- For the Essential health tier, interns (Band A) receive an annual sum insured of ₹3,00,000 [Source 1].\n- Interns (Band A) are eligible for one dental check-up [Source 1].\n- The LTA limit for Intern, Band A is ₹25,000 [Source 2].",
+    "passed": true,
+    "failReasons": []
+  },
+  {
+    "question": "Does the Standard health tier cover dental implants?",
+    "retrievedIds": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "coverageScore": 1,
+    "coverageExplanation": "The question asks if the Standard health tier covers dental implants. The FACTS contain a table that explicitly states 'Standard' tier has 'Not covered' for 'Dental implants'. Therefore, the information need is fully covered.",
+    "groundednessScore": 1,
+    "groundednessExplanation": "The FACTS state that for the Standard tier (eligible for Band B, Band C), dental implants are 'Not covered'. The ANSWER correctly reflects this information.",
+    "answer": "- Dental implants are not covered for the Standard health tier. [Source 1]",
+    "passed": true,
+    "failReasons": []
+  },
+  {
+    "question": "What does POL-OPT-8000 refer to?",
+    "retrievedIds": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "coverageScore": 0,
+    "coverageExplanation": "The question asks what 'POL-OPT-8000' refers to. The FACTS mention '₹8,000' in relation to the 'Standard Health Tier' optical allowance in multiple sections, but they never explicitly define or mention the identifier 'POL-OPT-8000'. Therefore, the specific reference is missing.",
+    "groundednessScore": 0.75,
+    "groundednessExplanation": "The answer is a general refusal to answer and directs the user to contact HR. Since the FACTS provide specific contact information for leave questions (HR at hr@example.com) and general policy details, stating a blanket inability to answer and only directing to 'HR' is not fully supported or is an oversimplification of the available contact information.",
+    "answer": "I cannot answer this please Contact HR.",
+    "passed": false,
+    "failReasons": [
+      "Coverage 0 below threshold 0.7"
+    ]
+  },
+  {
+    "question": "I joined the company after January 1, need to take three consecutive days off, and still have some unused leave left at the end of the year. How are my leave entitlements calculated, how far in advance do I need to request the planned leave, and what happens to any unused casual and privilege leave when the year ends?",
+    "retrievedIds": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "coverageScore": 0.75,
+    "coverageExplanation": "The question has three distinct information needs: 1) How leave entitlements are calculated for someone joining after Jan 1; 2) How far in advance to request 3+ consecutive days off; and 3) What happens to unused casual and privilege leave at year-end. \n\nCoverage: \n1. Leave accrual for joining after Jan 1 is covered: 'Employees who join after 1 January receive leave on a pro-rata basis, rounded to the nearest half day.' (Covered)\n2. Advance notice for 3+ consecutive days is covered: 'Privilege leave requests of 3 or more consecutive days must be submitted at least 7 days in advance.' (Covered)\n3. Year-end carry-forward: Casual leave carry-forward is partially covered (one section says it lapses on 31 December, another says it cannot be carried forward). Privilege leave carry-forward is covered with limits (max 15 days, or encashment). However, the question asks generally what happens to *any* unused casual and privilege leave, and the facts provide conflicting/specific rules rather than a single general answer for both types at year-end. Given the specific rules provided for both types, we count this as mostly covered, but the conflicting/complex nature means it's not fully comprehensive for a general 'what happens' query.\n\nOverall, 2 out of 3 needs are clearly and fully covered, and the third need is substantially covered with specific details provided for both leave types. Therefore, most information is covered.",
+    "groundednessScore": 1,
+    "groundednessExplanation": "The answer is fully supported by the provided FACTS. Each point regarding pro-rata leave, PL request advance notice, casual leave carry-forward limits, and PL carry-forward/encashment limits is directly stated in the respective sections of the retrieved documents.",
+    "answer": "- Employees who join after 1 January receive leave on a pro-rata basis, rounded to the nearest half day [Source 1].\n- Privilege leave requests of 3 or more consecutive days must be submitted at least 7 days in advance [Source 6].\n- A maximum of 8 days of unused casual leave may be carried forward to the next calendar year, and any casual leave above 8 days lapses on 31 December [Source 5].\n- A maximum of 15 days of unused privilege leave may be carried forward [Source 4].\n- Privilege leave above 15 days may be encashed at the employee’s basic daily rate, subject to payroll cut-off dates announced each December [Source 4].",
+    "passed": true,
+    "failReasons": []
+  }
+]

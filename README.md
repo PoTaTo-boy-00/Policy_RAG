@@ -2,7 +2,7 @@
 
 A RAG-based HR policy assistant that retrieves relevant policy information from uploaded documents and generates grounded answers with source citations.
 
-DENO VIDEO: [Demo Video](https://drive.google.com/file/d/1KemlbiLafMCjaORFUzdKQqNOr8lf7Tw2/view?usp=sharing)
+DEMO VIDEO: [Demo Video](https://drive.google.com/file/d/1KemlbiLafMCjaORFUzdKQqNOr8lf7Tw2/view?usp=sharing)
 
 ## Projects
 
