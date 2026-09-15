@@ -289,18 +289,21 @@ Response
 ## 6. Trade-offs
 
 ### Structure-Aware Chunking vs Fixed-Size Chunking
+
 ```text
 A fixed-size chunking strategy is simpler and provides consistent chunk sizes, but it can split content across semantic boundaries. The system therefore uses structure-aware chunking and applies Recursive Text Splitting only when a structure exceeds 500 characters.
 
 This preserves document structure while keeping chunks within a manageable size.
 ```
 ###  Dense Retrieval vs Hybrid Retrieval
+
 ```text
 Dense retrieval provides strong semantic matching but can miss exact policy terminology. Since policy documents contain specific terms, benefit names, exclusions, and numerical values, the system combines dense retrival (using Cosine Similarity) and sparse retrieval (using BM25 Retriever).
 
 RRF is then used to combine the results from both retrieval methods. This improves retrieval coverage at the cost of additional retrieval complexity.
 ```
 ### Single Query vs Query Decomposition
+
 ```text
 Using the original query directly is simpler and has lower latency, but complex questions can contain multiple independent intents. The system therefore decomposes complex queries into intent-specific sub-queries and retrieves results independently.
 
