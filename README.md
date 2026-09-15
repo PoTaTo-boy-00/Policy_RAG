@@ -11,7 +11,7 @@ DEMO VIDEO: [Demo Video](https://drive.google.com/file/d/1KemlbiLafMCjaORFUzdKQq
 
 ## Running Locally
 
-The application consists of a Next.js frontend and a backend service. The backend requires Redis and Ollama for processing and local LLM/embedding inference.
+The application consists of a Next.js frontend and a backend service. The backend requires PostgreSQL with pgvector , Redis and Ollama for processing and local LLM/embedding inference.
 
 ---
 ### Prerequisites
