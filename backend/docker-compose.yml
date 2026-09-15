@@ -1,0 +1,28 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    container_name: rag-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+  postgres:
+    image:  pgvector/pgvector:pg16 
+    ports:
+      - "5433:5432"
+    container_name: rag-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: myapp
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  
+
+volumes:
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local

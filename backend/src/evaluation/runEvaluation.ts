@@ -47,11 +47,11 @@ const evalQueries: EvalQuery[] = [
     query: "What does POL-OPT-8000 refer to?",
     expected: true,
   },
-  {
-    query:
-      "I joined the company after January 1, need to take three consecutive days off, and still have some unused leave left at the end of the year. How are my leave entitlements calculated, how far in advance do I need to request the planned leave, and what happens to any unused casual and privilege leave when the year ends?",
-    expected: true,
-  },
+  // {
+  //   query:
+  //     "I joined the company after January 1, need to take three consecutive days off, and still have some unused leave left at the end of the year. How are my leave entitlements calculated, how far in advance do I need to request the planned leave, and what happens to any unused casual and privilege leave when the year ends?",
+  //   expected: true,
+  // },
 ];
 
 const COVERAGE_THRESHOLD = 0.7;

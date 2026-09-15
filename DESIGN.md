@@ -36,7 +36,7 @@ The ingestion pipeline accepts PDF, Markdown, and TXT documents. PDF documents a
 During processing the file system identifies structual elements liek headings,paragraphs
 and tables.This structure is preserved during chunking rather than treating the document as an unstructured block of text.
 
-### Chunking Strategy
+
 
 ### Chunking Strategy
 
@@ -125,15 +125,38 @@ If the retrieved chunks do not provide sufficient evidence for the user's questi
 This approach prioritizes grounding over answer completeness. A missing or uncertain policy answer is preferable to an incorrect answer that appears authoritative.
 ```
 ---
+## 4. Evaluation
 
-## 4. Schema & APIs
+A tiny evaluation set (8 representative questions covering direct-fact,
+table/structured, and off-policy cases) runs after each change to catch
+regressions in retrieval and generation.
+
+For each question, the harness:
+
+- Runs retrieval and generation through the live pipeline.
+- Scores **coverage** — whether retrieved chunks contain the information
+  needed to answer the question, via an LLM judge with an explicit rubric
+  and few-shot examples (including a specificity check so content about the
+  wrong employee band/tier doesn't count as coverage).
+- Scores **groundedness** — whether every claim in the generated answer is
+  actually supported by the retrieved chunks, including a check that
+  distinguishes an honest "I don't have this information" from a fabricated
+  exclusion claim like "X is not covered" when the policy is simply silent
+  on X.
+- Fails the run (non-zero exit code) if either score falls below a
+  threshold, so it can gate changes in a dev loop or CI.
+
+
+---
+
+## 5. Schema & APIs
 
 The system exposes three main endpoints covering document ingestion, query
 creation, and streamed answer generation.
 
 ---
 
-### 4.1 `/upload`
+### 5.1 `/upload`
 
 The `/upload` endpoint accepts policy documents in Markdown, TXT, or PDF
 format. Uploaded files are processed and indexed so they can be used during
@@ -155,7 +178,7 @@ subsequent queries.
 }
 ```
 ---
-### 4.2 `/query`
+### 5.2 `/query`
 The `/query` endpoint accepts a user's question and the IDs of the documents
 that should be searched.
 
@@ -186,7 +209,7 @@ allows the client to associate the final answer with the policy evidence used
 by the RAG pipeline.
 
 ---
-### 4.3 `/query/stream?queryId=<queryId>`
+### 5.3 `/query/stream?queryId=<queryId>`
 The `/query/stream` endpoint generates and streams the answer for an existing
 query.
 The query ID is provided as a URL query parameter.
@@ -213,7 +236,7 @@ instead of waiting for the complete LLM response.
 
 ---
  
-### 4.4 `/records`
+### 5.4 `/records`
 
 The `/records` endpoint retrieves the available document records.
 
@@ -226,7 +249,7 @@ Response
 
 ```
 ---
-### 4.5 `/records/:id`
+### 5.5 `/records/:id`
 
 The `/records/:id` endpoint updates a document record using its ID.
 
@@ -244,7 +267,7 @@ Response
 }
 ```
 ---
-### 4.6 `/records/:id`
+### 5.6 `/records/:id`
 
 The same resource endpoint supports deletion of a document record.
 
@@ -263,7 +286,7 @@ Response
 }
 ```
 ---
-## 5. Trade-offs
+## 6. Trade-offs
 
 ### Structure-Aware Chunking vs Fixed-Size Chunking
 ```text
@@ -273,7 +296,7 @@ This preserves document structure while keeping chunks within a manageable size.
 ```
 ###  Dense Retrieval vs Hybrid Retrieval
 ```text
-Dense retrieval provides strong semantic matching but can miss exact policy terminology. Since policy documents contain specific terms, benefit names, exclusions, and numerical values, the system combines dense and sparse retrieval.
+Dense retrieval provides strong semantic matching but can miss exact policy terminology. Since policy documents contain specific terms, benefit names, exclusions, and numerical values, the system combines dense retrival (using Cosine Similarity) and sparse retrieval (using BM25 Retriever).
 
 RRF is then used to combine the results from both retrieval methods. This improves retrieval coverage at the cost of additional retrieval complexity.
 ```
@@ -284,13 +307,13 @@ Using the original query directly is simpler and has lower latency, but complex 
 This increases retrieval cost and latency, but improves coverage by allowing each intent to retrieve its own relevant chunks.
 ```
 ---
-## 6. Future Improvements
+## 7. Future Improvements
 
 If I had two additional weeks, I would prioritize the following improvements:
 
-### 1. Retrieval Evaluation
+### 1. Expand the Evaluation Set
 
-Build an evaluation dataset containing representative policy questions and their expected source chunks. This would allow systematic measurement of retrieval quality and help tune chunking, hybrid retrieval, and reranking.
+A small evaluation set (see Evaluation section above) already covers a handful of representative questions with coverage and groundedness scoring. With more time I would expand this to a larger, more representative question set (20–50+ questions spanning direct-fact, table/structured, and off-policy refusal cases) and wire it into CI so it runs automatically on every retrieval or prompt change rather than manually.
 
 ### 2. Chunking Improvements
 

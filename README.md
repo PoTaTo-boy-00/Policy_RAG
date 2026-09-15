@@ -22,6 +22,7 @@ The following services/tools are required:
 - Node.js
 - PostgreSQL with `pgvector`
 - Redis
+- Docker (to run Redis and pgvector locally)
 - Ollama
 - Cohere API key
 ---
@@ -56,6 +57,12 @@ Install backend dependencies:
 ```bash
 cd ../backend
 npm install
+docker-compose -f docker-compose.yml up 
+```
+
+Create a Upload Folder in Root Directory
+```bash
+mkdir uploads
 ```
 ---
 ### 3. Database
@@ -138,6 +145,11 @@ OLLAMA_BASE_URL=http://localhost:11434
 # Cohere
 COHERE_API_KEY=<cohere_api_key>
 
+"Models
+GENERATION_MODEL="gemma4"
+EVALUATION_MODEL="gemma4"
+EMBEDDING_MODEL="nomic-embed-text"
+
 ```
 
 > If using a hosted Redis provider, replace `REDIS_URL` with your provider's connection string.
@@ -170,3 +182,12 @@ npm run dev
 ```
 
 The Next.js development server will then be available at the URL shown in the terminal.
+
+---
+### 10. Running the eval set
+```bash
+npm run eval
+```
+Runs a small set of test questions against the current index and checks
+retrieval coverage + answer groundedness using an LLM judge. See DESIGN.md
+for what this checks and why.
