@@ -13,16 +13,45 @@ function truncate(str: string, maxLen = 60): string {
   if (!str) return "";
   return str.length > maxLen ? str.slice(0, maxLen) + "…" : str;
 }
+type EvalQuery = {
+  query: string;
+  expected: boolean;
+};
 
-const evalQueries: string[] = [
-  "What is the optical allowance for Band C employees?",
-  "Is dental implant treatment covered?",
-  "What happens to unused casual leave?",
-  "how many maternity leave can i get ?",
-  "what benefits do i get as an intern?",
-  "Does the Standard health tier cover dental implants?",
-  "What does POL-OPT-8000 refer to?",
-  "I joined the company after January 1, need to take three consecutive days off, and still have some unused leave left at the end of the year. How are my leave entitlements calculated, how far in advance do I need to request the planned leave, and what happens to any unused casual and privilege leave when the year ends?",
+const evalQueries: EvalQuery[] = [
+  {
+    query: "What is the optical allowance for Band C employees?",
+    expected: true,
+  },
+  {
+    query: "Is dental implant treatment covered under the health benefits?",
+    expected: true,
+  },
+  {
+    query: "What happens to unused casual leave at the end of the year?",
+    expected: true,
+  },
+  {
+    query: "How many days of maternity leave are available to employees?",
+    expected: false,
+  },
+  {
+    query: "What benefits are available to interns?",
+    expected: true,
+  },
+  {
+    query: "Does the Standard health tier cover dental implants?",
+    expected: true,
+  },
+  {
+    query: "What does POL-OPT-8000 refer to?",
+    expected: true,
+  },
+  {
+    query:
+      "I joined the company after January 1, need to take three consecutive days off, and still have some unused leave left at the end of the year. How are my leave entitlements calculated, how far in advance do I need to request the planned leave, and what happens to any unused casual and privilege leave when the year ends?",
+    expected: true,
+  },
 ];
 
 const COVERAGE_THRESHOLD = 0.7;
@@ -36,11 +65,12 @@ type EvalResult = {
   groundednessScore: number | null;
   groundednessExplanation: string;
   answer: string;
+  expected:boolean;
   passed: boolean;
   failReasons: string[];
 };
 
-async function runEvalCase(question: string): Promise<EvalResult> {
+async function runEvalCase(question: string,expected:boolean): Promise<EvalResult> {
   const failReasons: string[] = [];
   const pathIds: string[] = await getDocumentId();
   // console.log(pathIds)
@@ -59,6 +89,7 @@ async function runEvalCase(question: string): Promise<EvalResult> {
       groundednessScore: null,
       groundednessExplanation: "",
       answer: "",
+      expected:false,
       passed: false,
       failReasons: ["Retrieval returned no queryData (hard failure)"],
     };
@@ -95,6 +126,7 @@ async function runEvalCase(question: string): Promise<EvalResult> {
     groundednessScore: groundedness.score,
     groundednessExplanation: groundedness.explanation,
     answer: answer || "",
+    expected:expected,
     passed: failReasons.length === 0,
     failReasons,
   };
@@ -103,21 +135,22 @@ async function runEvalCase(question: string): Promise<EvalResult> {
 async function main() {
   const results: EvalResult[] = [];
 
-  for (const question of evalQueries) {
-    console.log(`\nRunning: ${question}`);
+  for (const q of evalQueries) {
+    console.log(`\nRunning: ${q.query}`);
     try {
-      const result = await runEvalCase(question);
+      const result = await runEvalCase(q.query,q.expected);
       results.push(result);
     } catch (err) {
-      console.error(`Eval case threw for "${question}":`, err);
+      console.error(`Eval case threw for "${q.query}":`, err);
       results.push({
-        question,
+        question:q.query,
         // retrievedIds: [],
         coverageScore: null,
         coverageExplanation: "",
         groundednessScore: null,
         groundednessExplanation: "",
         answer: "",
+        expected:q.expected,
         passed: false,
         failReasons: [`Threw error: ${(err as Error).message}`],
       });
@@ -141,7 +174,7 @@ async function main() {
       coverageExplanation: truncate(r.coverageExplanation, 60),
       groundedness: r.groundednessScore,
       groundednessExplanation: truncate(r.groundednessExplanation, 60),
-      passed: r.passed,
+      passed: r.passed===r.expected,
     })),
   );
 
